@@ -1,18 +1,20 @@
-import express from "express"
-import dotenv from "dotenv"
+import express from "express";
+import dotenv from "dotenv";
 import { connectdb } from "./config/db.js";
-import { Login, register } from "./controllers/authController.js";
+import authRoutes from "./routes/authRoutes.js";
+
+dotenv.config();
 
 const app = express();
 
-dotenv.config();
-connectdb();
-
 app.use(express.json());
 
-app.post("/api/register" , register);
-app.post("/api/login" , Login);
+// DB Connection
+connectdb();
 
-app.listen(process.env.PORT, ()=>{
-    console.log("server is running on port ", process.env.PORT )
-})
+// Routes
+app.use("/api/auth", authRoutes);
+
+app.listen(process.env.PORT, () => {
+  console.log("server is running on port ", process.env.PORT);
+});

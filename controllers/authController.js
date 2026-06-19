@@ -1,6 +1,14 @@
 import bcrypt from "bcrypt";
 import { UserRegisterSchema } from "../models/register.js";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
+
+export const logout = (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Logged out successfully. Please clear your token on the client.",
+  });
+};
+
 export const register = async (req, res) => {
   try {
     const { name, email, password, phoneNumber } = req.body;
@@ -49,7 +57,6 @@ export const register = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
@@ -80,10 +87,7 @@ export const Login = async (req, res) => {
     }
 
     // Compare password
-    const isMatch = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(401).json({
@@ -100,9 +104,7 @@ export const Login = async (req, res) => {
         role: user.role,
       },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
+      { expiresIn: "7d" }
     );
 
     return res.status(200).json({
@@ -119,7 +121,6 @@ export const Login = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
