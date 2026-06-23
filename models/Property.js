@@ -93,6 +93,24 @@ const propertySchema = new mongoose.Schema(
       default: "Available",
     },
 
+    // Admin approval workflow
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
+
+    rejectionReason: {
+      type: String,
+      default: null,
+    },
+
+    // Featured listing — Admin only
+    isFeatured: {
+      type: Boolean,
+      default: false,
+    },
+
     // Owner reference
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

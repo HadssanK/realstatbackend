@@ -37,7 +37,7 @@ export const register = async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create user
+    // Create user — role field intentionally ignored to prevent privilege escalation
     const user = await UserRegisterSchema.create({
       name,
       email,

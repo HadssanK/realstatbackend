@@ -31,6 +31,11 @@ const registerSchema = new mongoose.Schema(
       enum: ["Buyer", "agent"],
       default: "Buyer",
     },
+
+    isBlocked: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

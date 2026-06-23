@@ -161,6 +161,9 @@ export const getAllProperties = async (req, res) => {
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
 
+    // Public mein sirf approved properties dikhein
+    filter.approvalStatus = "approved";
+
     const skip = (Number(page) - 1) * Number(limit);
     const total = await Property.countDocuments(filter);
 
@@ -220,8 +223,11 @@ export const updateProperty = async (req, res) => {
       return res.status(404).json({ success: false, message: "Property not found" });
     }
 
-    // Only owner can update
-    if (property.createdBy.toString() !== req.user._id.toString()) {
+    // Only owner or admin can update
+    const isOwner = property.createdBy.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === "admin";
+
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to update this property",
@@ -285,8 +291,11 @@ export const deleteProperty = async (req, res) => {
       return res.status(404).json({ success: false, message: "Property not found" });
     }
 
-    // Only owner can delete
-    if (property.createdBy.toString() !== req.user._id.toString()) {
+    // Only owner or admin can delete
+    const isOwner = property.createdBy.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === "admin";
+
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to delete this property",
@@ -333,5 +342,128 @@ export const getMyProperties = async (req, res) => {
       success: false,
       message: "Internal Server Error",
     });
+  }
+};
+
+// ─── Admin: Get All Pending Properties ───────────────────────────────────────
+export const getPendingProperties = async (req, res) => {
+  try {
+    const properties = await Property.find({ approvalStatus: "pending" })
+      .populate("createdBy", "name email phoneNumber")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      total: properties.length,
+      data: properties,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+// ─── Admin: Approve Property ──────────────────────────────────────────────────
+export const approveProperty = async (req, res) => {
+  try {
+    const property = await Property.findById(req.params.id);
+
+    if (!property) {
+      return res.status(404).json({ success: false, message: "Property not found" });
+    }
+
+    property.approvalStatus = "approved";
+    property.rejectionReason = null;
+    await property.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Property approved successfully",
+      data: property,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+// ─── Admin: Reject Property ───────────────────────────────────────────────────
+export const rejectProperty = async (req, res) => {
+  try {
+    const { reason } = req.body;
+
+    const property = await Property.findById(req.params.id);
+
+    if (!property) {
+      return res.status(404).json({ success: false, message: "Property not found" });
+    }
+
+    property.approvalStatus = "rejected";
+    property.rejectionReason = reason || "No reason provided";
+    await property.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Property rejected",
+      data: property,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+// ─── Admin: Toggle Featured ───────────────────────────────────────────────────
+export const toggleFeatured = async (req, res) => {
+  try {
+    const property = await Property.findById(req.params.id);
+
+    if (!property) {
+      return res.status(404).json({ success: false, message: "Property not found" });
+    }
+
+    // Only approved properties can be featured
+    if (property.approvalStatus !== "approved") {
+      return res.status(400).json({
+        success: false,
+        message: "Only approved properties can be marked as featured",
+      });
+    }
+
+    property.isFeatured = !property.isFeatured;
+    await property.save();
+
+    return res.status(200).json({
+      success: true,
+      message: property.isFeatured
+        ? "Property marked as featured"
+        : "Property removed from featured",
+      data: property,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+// ─── Public: Get Featured Properties (Homepage) ───────────────────────────────
+export const getFeaturedProperties = async (req, res) => {
+  try {
+    const properties = await Property.find({
+      isFeatured: true,
+      approvalStatus: "approved",
+    })
+      .populate("createdBy", "name email phoneNumber")
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    return res.status(200).json({
+      success: true,
+      total: properties.length,
+      data: properties,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
