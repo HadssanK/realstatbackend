@@ -1,5 +1,6 @@
 import cloudinary from "../config/cloudnary.js";
 import { Property } from "../models/Property.js";
+import { Inquiry } from "../models/Inquiry.js";
 
 // ─── Helper: upload buffer to Cloudinary ─────────────────────────────────────
 const uploadToCloudinary = (buffer, mimetype) => {
@@ -192,10 +193,11 @@ export const getAllProperties = async (req, res) => {
 // ─── Get Single Property ──────────────────────────────────────────────────────
 export const getPropertyById = async (req, res) => {
   try {
-    const property = await Property.findById(req.params.id).populate(
-      "createdBy",
-      "name email phoneNumber"
-    );
+    const property = await Property.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { views: 1 } },  // increment view on every visit
+      { new: true }
+    ).populate("createdBy", "name email phoneNumber");
 
     if (!property) {
       return res.status(404).json({
@@ -461,6 +463,56 @@ export const getFeaturedProperties = async (req, res) => {
       success: true,
       total: properties.length,
       data: properties,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+// ─── Agent Dashboard ──────────────────────────────────────────────────────────
+export const getAgentDashboard = async (req, res) => {
+  try {
+    const agentId = req.user._id;
+
+    const properties = await Property.find({ createdBy: agentId });
+
+    const totalProperties = properties.length;
+    const totalViews = properties.reduce((sum, p) => sum + (p.views || 0), 0);
+    const totalInquiries = await Inquiry.countDocuments({
+      property: { $in: properties.map((p) => p._id) },
+    });
+
+    const statusBreakdown = {
+      available: properties.filter((p) => p.status === "Available").length,
+      sold: properties.filter((p) => p.status === "Sold").length,
+      rented: properties.filter((p) => p.status === "Rented").length,
+    };
+
+    const approvalBreakdown = {
+      pending: properties.filter((p) => p.approvalStatus === "pending").length,
+      approved: properties.filter((p) => p.approvalStatus === "approved").length,
+      rejected: properties.filter((p) => p.approvalStatus === "rejected").length,
+    };
+
+    // Top 5 most viewed properties
+    const topProperties = await Property.find({ createdBy: agentId })
+      .sort({ views: -1 })
+      .limit(5)
+      .select("title price city status views approvalStatus");
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        stats: {
+          totalProperties,
+          totalViews,
+          totalInquiries,
+        },
+        statusBreakdown,
+        approvalBreakdown,
+        topProperties,
+      },
     });
   } catch (error) {
     console.log(error);

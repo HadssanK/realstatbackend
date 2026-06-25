@@ -11,6 +11,7 @@ import {
   rejectProperty,
   toggleFeatured,
   getFeaturedProperties,
+  getAgentDashboard,
 } from "../controllers/propertyController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorize } from "../middleware/roleMiddleware.js";
@@ -24,6 +25,7 @@ router.get("/featured", getFeaturedProperties);
 
 // Protected routes
 router.get("/user/my-properties", protect, getMyProperties);
+router.get("/agent/dashboard", protect, getAgentDashboard);
 router.post("/", protect, upload.array("images", 10), createProperty);
 router.put("/:id", protect, upload.array("images", 10), updateProperty);
 router.delete("/:id", protect, deleteProperty);

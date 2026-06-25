@@ -1,0 +1,349 @@
+{
+  "info": {
+    "name": "RealState API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000/api" },
+    { "key": "token", "value": "" },
+    { "key": "admin_token", "value": "" },
+    { "key": "property_id", "value": "" },
+    { "key": "user_id", "value": "" },
+    { "key": "category_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Hassan Ali\",\n  \"email\": \"hassan@gmail.com\",\n  \"password\": \"123456\",\n  \"phoneNumber\": 3001234567\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hassan@gmail.com\",\n  \"password\": \"123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login (Admin)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\": \"admin123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/auth/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/logout",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Properties",
+      "item": [
+        {
+          "name": "Get All Properties",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/properties?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["properties"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "city", "value": "", "disabled": true },
+                { "key": "listingType", "value": "Sale", "disabled": true },
+                { "key": "propertyType", "value": "Villa", "disabled": true },
+                { "key": "minPrice", "value": "1000000", "disabled": true },
+                { "key": "maxPrice", "value": "50000000", "disabled": true },
+                { "key": "bedrooms", "value": "3", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Featured Properties",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/properties/featured"
+          }
+        },
+        {
+          "name": "Get Single Property",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/properties/{{property_id}}"
+          }
+        },
+        {
+          "name": "Get My Properties",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/properties/user/my-properties",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Create Property",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/properties",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Dream Villa Lahore", "type": "text" },
+                { "key": "description", "value": "Beautiful 3 bed villa with garden and pool", "type": "text" },
+                { "key": "price", "value": "15000000", "type": "text" },
+                { "key": "propertyType", "value": "Villa", "type": "text" },
+                { "key": "listingType", "value": "Sale", "type": "text" },
+                { "key": "bedrooms", "value": "3", "type": "text" },
+                { "key": "bathrooms", "value": "2", "type": "text" },
+                { "key": "area", "value": "2000", "type": "text" },
+                { "key": "address", "value": "12 Garden Town", "type": "text" },
+                { "key": "city", "value": "Lahore", "type": "text" },
+                { "key": "country", "value": "Pakistan", "type": "text" },
+                { "key": "lat", "value": "31.5204", "type": "text" },
+                { "key": "lng", "value": "74.3587", "type": "text" },
+                { "key": "parking", "value": "true", "type": "text" },
+                { "key": "pool", "value": "true", "type": "text" },
+                { "key": "gym", "value": "false", "type": "text" },
+                { "key": "garden", "value": "true", "type": "text" },
+                { "key": "security", "value": "true", "type": "text" },
+                { "key": "elevator", "value": "false", "type": "text" },
+                { "key": "status", "value": "Available", "type": "text" },
+                { "key": "images", "type": "file", "src": [] }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Property",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/properties/{{property_id}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Updated Villa Title", "type": "text" },
+                { "key": "price", "value": "16000000", "type": "text" },
+                { "key": "status", "value": "Available", "type": "text" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Property",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/properties/{{property_id}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Properties",
+      "item": [
+        {
+          "name": "Get Pending Properties",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/properties/admin/pending",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        },
+        {
+          "name": "Approve Property",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/properties/admin/{{property_id}}/approve",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        },
+        {
+          "name": "Reject Property",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/properties/admin/{{property_id}}/reject",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Images are not clear\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Toggle Featured",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/properties/admin/{{property_id}}/featured",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/admin/users?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "users"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "role", "value": "agent", "disabled": true },
+                { "key": "isBlocked", "value": "true", "disabled": true }
+              ]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        },
+        {
+          "name": "Get Single User",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/users/{{user_id}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        },
+        {
+          "name": "Block / Unblock User",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/admin/users/{{user_id}}/block",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        },
+        {
+          "name": "Promote to Agent",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/admin/users/{{user_id}}/promote",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/admin/users/{{user_id}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Stats",
+      "item": [
+        {
+          "name": "Get Platform Stats",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/stats",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get All Categories (Public)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/categories"
+          }
+        },
+        {
+          "name": "Get All Categories (Admin)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/categories",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/admin/categories",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Villa\",\n  \"description\": \"Luxury villa properties\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/admin/categories/{{category_id}}",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Luxury Villa\",\n  \"description\": \"Updated description\",\n  \"isActive\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/admin/categories/{{category_id}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        }
+      ]
+    }
+  ]
+}

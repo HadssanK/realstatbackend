@@ -111,6 +111,12 @@ const propertySchema = new mongoose.Schema(
       default: false,
     },
 
+    // View counter
+    views: {
+      type: Number,
+      default: 0,
+    },
+
     // Owner reference
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
