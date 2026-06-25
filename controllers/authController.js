@@ -3,9 +3,15 @@ import { UserRegisterSchema } from "../models/register.js";
 import jwt from "jsonwebtoken";
 
 export const logout = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  });
+
   res.status(200).json({
     success: true,
-    message: "Logged out successfully. Please clear your token on the client.",
+    message: "Logged out successfully",
   });
 };
 
@@ -107,10 +113,18 @@ export const Login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    // Set HTTP-only cookie
+    res.cookie("token", token, {
+      httpOnly: true,                          // JS se access nahi hoga
+      secure: process.env.NODE_ENV === "production", // HTTPS only in production
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,        // 7 days in ms
+    });
+
     return res.status(200).json({
       success: true,
       message: "Login successful",
-      token,
+      token, // bhi return kar rahe hain — Postman/mobile apps ke liye
       user: {
         id: user._id,
         name: user.name,

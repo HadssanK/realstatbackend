@@ -36,6 +36,27 @@ const registerSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    // Agent profile fields
+    profileImage: {
+      url: { type: String, default: "" },
+      public_id: { type: String, default: "" },
+    },
+    bio: {
+      type: String,
+      default: "",
+    },
+    agencyName: {
+      type: String,
+      default: "",
+    },
+
+    favorites: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Property",
+      },
+    ],
   },
   {
     timestamps: true,

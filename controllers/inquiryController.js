@@ -4,7 +4,7 @@ import { Property } from "../models/Property.js";
 // ─── Send Inquiry (Buyer → Agent) ─────────────────────────────────────────────
 export const sendInquiry = async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message, buyerName, buyerEmail, buyerPhone } = req.body;
     const propertyId = req.params.propertyId;
 
     if (!message) {
@@ -25,9 +25,17 @@ export const sendInquiry = async (req, res) => {
       return res.status(400).json({ success: false, message: "You cannot inquire on your own property" });
     }
 
+    // Auto-fill from logged-in user if not provided
+    const name = buyerName || req.user.name;
+    const email = buyerEmail || req.user.email;
+    const phone = buyerPhone || String(req.user.phoneNumber || "");
+
     const inquiry = await Inquiry.create({
       property: propertyId,
       sender: req.user._id,
+      buyerName: name,
+      buyerEmail: email,
+      buyerPhone: phone,
       message,
     });
 

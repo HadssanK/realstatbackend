@@ -4,16 +4,23 @@ import { UserRegisterSchema } from "../models/register.js";
 export const protect = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
+    let token;
 
-    // Check if token exists and starts with Bearer
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    // Priority 1: Authorization header (Postman/mobile)
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
+    }
+    // Priority 2: HTTP-only cookie (browser)
+    else if (req.cookies && req.cookies.token) {
+      token = req.cookies.token;
+    }
+
+    if (!token) {
       return res.status(401).json({
         success: false,
         message: "Access denied. No token provided.",
       });
     }
-
-    const token = authHeader.split(" ")[1];
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);

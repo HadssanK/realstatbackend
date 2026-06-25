@@ -136,6 +136,9 @@ export const createProperty = async (req, res) => {
 export const getAllProperties = async (req, res) => {
   try {
     const {
+      // Search
+      keyword,
+      // Filters
       city,
       country,
       listingType,
@@ -144,33 +147,72 @@ export const getAllProperties = async (req, res) => {
       minPrice,
       maxPrice,
       bedrooms,
+      bathrooms,
+      minArea,
+      maxArea,
+      // Sort
+      sortBy = "newest",
+      // Pagination
       page = 1,
       limit = 10,
     } = req.query;
 
     const filter = {};
 
+    // Only approved properties public mein
+    filter.approvalStatus = "approved";
+
+    // ── Keyword search (title, city, address) ──
+    if (keyword) {
+      filter.$or = [
+        { title: { $regex: keyword, $options: "i" } },
+        { city: { $regex: keyword, $options: "i" } },
+        { address: { $regex: keyword, $options: "i" } },
+        { description: { $regex: keyword, $options: "i" } },
+      ];
+    }
+
+    // ── Filters ──
     if (city) filter.city = { $regex: city, $options: "i" };
     if (country) filter.country = { $regex: country, $options: "i" };
     if (listingType) filter.listingType = listingType;
     if (propertyType) filter.propertyType = propertyType;
     if (status) filter.status = status;
     if (bedrooms) filter.bedrooms = Number(bedrooms);
+    if (bathrooms) filter.bathrooms = Number(bathrooms);
+
+    // ── Price range ──
     if (minPrice || maxPrice) {
       filter.price = {};
       if (minPrice) filter.price.$gte = Number(minPrice);
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
 
-    // Public mein sirf approved properties dikhein
-    filter.approvalStatus = "approved";
+    // ── Area range ──
+    if (minArea || maxArea) {
+      filter.area = {};
+      if (minArea) filter.area.$gte = Number(minArea);
+      if (maxArea) filter.area.$lte = Number(maxArea);
+    }
 
+    // ── Sort ──
+    let sortOption = {};
+    switch (sortBy) {
+      case "price_asc":   sortOption = { price: 1 };       break;
+      case "price_desc":  sortOption = { price: -1 };      break;
+      case "most_viewed": sortOption = { views: -1 };      break;
+      case "oldest":      sortOption = { createdAt: 1 };   break;
+      case "newest":
+      default:            sortOption = { createdAt: -1 };  break;
+    }
+
+    // ── Pagination ──
     const skip = (Number(page) - 1) * Number(limit);
     const total = await Property.countDocuments(filter);
 
     const properties = await Property.find(filter)
       .populate("createdBy", "name email phoneNumber")
-      .sort({ createdAt: -1 })
+      .sort(sortOption)
       .skip(skip)
       .limit(Number(limit));
 
